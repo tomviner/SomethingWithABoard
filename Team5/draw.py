@@ -4,7 +4,10 @@ import time
 
 import board
 
-from generate import map
+from generate import generate_board
+from ising import new_spin
+
+map = generate_board(12)
 
 
 class DrawingBoard(board.Board):
@@ -46,9 +49,12 @@ class View:
         self.width = 10
         self.height = 10
 
+    @property
+    def view(self):
+        return self.board[self.x:self.x+self.width, self.y:self.y+self.height]
+
     def draw(self):
-        view = self.board[self.x:self.x+self.width, self.y:self.y+self.height]
-        view.draw()
+        self.view.draw()
 
     def move(self, x, y):
         self.x += x
@@ -61,13 +67,23 @@ key_map = {
     'd': (1, 0),
 }
 
+os.system('clear')
 v = View(map)
 v.draw()
 for i in range(1000):
     key = input('move?')
+    os.system('clear')
     move = key_map[key]
     v.move(*move)
-    os.system('clear')
+    view = v.view
+    for coord, data in view.iterdata():
+        if not data:
+            ns = view.neighbours(coord)
+            vals = [view[coord] for coord in ns]
+            ones = len([v for v in vals if v==1])
+            minus_ones = len([v for v in vals if v==-1])
+            print(coords, data, (ones, minus_ones))
+            view[coord] = new_spin((ones, minus_ones))
     v.draw()
     # time.sleep(0.5)
 
