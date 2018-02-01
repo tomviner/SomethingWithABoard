@@ -15,3 +15,8 @@ def generate_board(size):
             map[i,j] = numpy_board[i,j]
 
     return map
+
+if __name__ == '__main__':
+    b = generate_board(20)
+    b[:10, :10].draw()
+    # print(map[:size,:size].draw())
