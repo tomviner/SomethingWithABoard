@@ -25,6 +25,39 @@ def ising_board(shape):
 
   return spins
 
+def new_spin(neighbours):
+
+    land_neighbours, sea_neighbours = neighbours
+
+    moment = 1
+
+    # External magnetic field
+    field = 0
+
+    # Temperature (in units of energy)
+    temperature = .1
+
+    # Interaction (ferromagnetic if positive, antiferromagnetic if negative)
+    interaction = 1
+
+    land_energy = - interaction * (land_neighbours - sea_neighbours) - moment * field
+
+    sea_energy = - land_energy
+
+    land_prob = np.exp(-land_energy / temperature)
+    sea_prob = np.exp(-sea_energy / temperature)
+
+    Z = land_prob + sea_prob
+
+    land_prob = land_prob / Z
+    sea_prob = sea_prob / Z
+
+    if np.random.rand() < land_prob:
+      return 1
+    else:
+      return -1
+
+
 def get_probability(energy1, energy2, temperature):
   return np.exp((energy1 - energy2) / temperature)
 
