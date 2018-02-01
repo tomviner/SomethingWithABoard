@@ -3,6 +3,14 @@ import ising
 
 from board import Infinity
 
-board = ising.ising_board((20,20))
+size = 20
 
-print(board)
+map = board.Board((Infinity,Infinity))
+
+numpy_board = ising.ising_board((size,size))
+
+for i in range(size):
+    for j in range(size):
+        map[i,j] = numpy_board[i,j]
+
+print(map[:size,:size].draw())
