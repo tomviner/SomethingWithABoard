@@ -3,18 +3,19 @@ import os
 import time
 
 import board
+from colorama import Fore, Back, Style
 
 from generate import generate_board
 from ising import new_spin
 
-map = generate_board(12)
+map = generate_board(20)
 
 
 class DrawingBoard(board.Board):
     filler = ["+", "-", "|", " "]
     fixes = {
-        '-1': 'S',
-        '1 ': 'L',
+        '-1': Fore.BLUE + '💧',
+        '1 ': Fore.GREEN + '📗',
     }
 
     def draw(self):
@@ -26,28 +27,18 @@ class DrawingBoard(board.Board):
                 for f in self.filler:
                     ch = ch.replace(f, '')
                 chs.append(ch)
-            print(''.join(chs))
+            print(''.join(chs), end='')
+            print(Style.RESET_ALL)
 
-
-
-# b1 = VisualInfinityBoard((board.Infinity, board.Infinity))
-
-# for i in range(20):
-#     for j in range(20):
-#         b1[(i, j)] = random.choice(['Sea', 'Land'])
-
-# b2 = b1[:10, :10]
-
-# b2.draw()
 
 class View:
-    def __init__(self, board, x=0, y=0):
+    def __init__(self, board, width, height, x=0, y=0):
         board.__class__ = DrawingBoard
         self.board = board
         self.x = x
         self.y = y
-        self.width = 10
-        self.height = 10
+        self.width = width
+        self.height = height
 
     @property
     def view(self):
@@ -57,8 +48,8 @@ class View:
         self.view.draw()
 
     def move(self, x, y):
-        self.x += x
-        self.y += y
+        self.x = max(self.x + x, 0)
+        self.y = max(self.y + y, 0)
 
 key_map = {
     'w': (0, -1),
@@ -67,25 +58,33 @@ key_map = {
     'd': (1, 0),
 }
 
+from nonblock_input import getch
+
+kgen = getch(0.1)
+
 os.system('clear')
-v = View(map)
+v = View(map, 50, 10)
 v.draw()
-for i in range(1000):
-    key = input('move?')
-    os.system('clear')
+while True:
+    key = next(kgen)
+    if not key:
+        continue
+    # key = input('move?')
     move = key_map[key]
     v.move(*move)
     view = v.view
-    for coord, data in view.iterdata():
+    for local_coord in iter(view):
+        coord = view._to_global(local_coord)
+        data = v.board[coord]
         if not data:
-            ns = view.neighbours(coord)
-            vals = [view[coord] for coord in ns]
+            ns = v.board.neighbours(coord)
+            vals = [v.board[coord] for coord in ns]
             ones = len([v for v in vals if v==1])
             minus_ones = len([v for v in vals if v==-1])
-            print(coords, data, (ones, minus_ones))
-            view[coord] = new_spin((ones, minus_ones))
+            v.board[coord] = new_spin((ones, minus_ones))
+    os.system('clear')
     v.draw()
-    # time.sleep(0.5)
+    time.sleep(0.01)
 
 
 

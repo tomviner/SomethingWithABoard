@@ -10,6 +10,7 @@ name = "pypi"
 board = "*"
 ipython = "*"
 numpy = "*"
+colorama = "*"
 
 
 [dev-packages]
@@ -18,4 +19,4 @@ numpy = "*"
 
 [requires]
 
-python_version = "3.7"
+python_version = "3.6"
